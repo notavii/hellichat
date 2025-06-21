@@ -1,6 +1,7 @@
 import {ID} from 'appwrite';
 import type { INewUser } from "../types";
-import { account } from './config';
+import { account, appwriteconfig, avatars, databases } from './config';
+import { data } from 'react-router-dom';
 
 export async function createUserAccount(user: INewUser) {
     try {
@@ -9,10 +10,45 @@ export async function createUserAccount(user: INewUser) {
             user.email,
             user.password,
             user.name
-        )
-        return newAccount;
-    } catch (error) {
-    console.error(error);
-    return error;
+        );
+        
+        if(!newAccount) throw Error;
+
+        const avatarUrl = avatars.getInitials(user.name);
+
+        const newUser = await saveUserToDB({
+            accountId: newAccount.$id,
+            name: newAccount.name,
+            email: newAccount.email,
+            username: user.username,
+            imageUrl: new URL(avatarUrl),
+        });
+
+        return newUser;
+    }   catch (error) {
+        console.error(error);
+        return error;
+    }
 }
+
+export async function saveUserToDB(user: {
+    accountId: string;
+    email: string;
+    name: string;
+    imageUrl: URL;
+    username?: string;
+
+}) {
+    try{
+        const newUser = await databases.createDocument(
+            appwriteconfig.databaseId,
+            appwriteconfig.userCollectionId,
+            ID.unique(),
+            user,
+        );
+
+        return newUser;
+    } catch (error) {
+        console.error(error);
+    }
 }
