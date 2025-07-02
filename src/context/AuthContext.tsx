@@ -15,18 +15,18 @@ export const INITIAL_USER = {
 const INITIAL_STATE = {
     user: INITIAL_USER,
     isAuthenticated: false,
-    isLoading: true,
+    isLoading: false,
     setUser: () => {},
     setIsAuthenticated: () => {},
     checkAuthUser: async () => false as boolean,
 
 }
 
-const AuthContext = createContext<IContextType>(INITIAL_STATE)
+const AuthContext = createContext<IContextType>(INITIAL_STATE);
 
 
-const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-    const [user, setUser] = useState<IUser>(INITIAL_USER)
+export function  AuthProvider ({ children }: { children: React.ReactNode }) {
+    const [user, setUser] = useState<IUser>(INITIAL_USER);
     const [isLoading, setIsLoading] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -34,6 +34,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 
     const checkAuthUser = async () => {
+        setIsLoading(true);
         try {
             const currentAccount = await getCurrentUser();
 
@@ -45,7 +46,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     email: currentAccount.email,
                     imageUrl: currentAccount.imageUrl,
                     bio: currentAccount.bio,
-                })
+                });
                 setIsAuthenticated(true);
                 return true;
             }
@@ -59,10 +60,13 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     useEffect(() => {
+
         if(
             localStorage.getItem('cookieFallback') === '[]' ||
             localStorage.getItem('cookieFallback') === null
-        )   navigate('/sign-in')
+        ) {
+            navigate('/sign-in');
+        }
 
         checkAuthUser();
     }, []);
@@ -75,8 +79,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         isLoading,
         isAuthenticated,
         setIsAuthenticated,
-        checkAuthUser
-    }
+        checkAuthUser,
+    };
 
     return (
         <AuthContext.Provider value={value}>
@@ -85,6 +89,5 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     )
 }
 
-export default AuthProvider;
 
-export const useUserContext = () => { useContext(AuthContext) };
+export const useUserContext = () =>  useContext(AuthContext) ;

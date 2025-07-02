@@ -10,8 +10,8 @@ export async function createUserAccount(user: INewUser) {
             user.password,
             user.name
         );
-        
-        if(!newAccount) throw Error;
+
+        if(!newAccount) throw new Error();
 
         const avatarUrl = avatars.getInitials(user.name);
 
@@ -26,7 +26,7 @@ export async function createUserAccount(user: INewUser) {
         return newUser;
     }   catch (error) {
         console.error(error);
-        return error;
+        throw error;
     }
 }
 
@@ -61,6 +61,7 @@ export async function signInAccount(user: {
         return session;
     } catch (error) {
         console.log(error);
+        return null;
         
     }
 }
